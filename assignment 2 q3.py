@@ -1,5 +1,5 @@
 # The code here decrypts the encrypted code saved in "encrypted_text.txt"
-# and saves the decrypted code in "decrypted_code.txt"
+# Saves the decrypted code in "decrypted_code.txt"
 
 def decrypt(text, key):
     """This function decrypts encrypted text using a key"""
