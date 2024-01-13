@@ -17,6 +17,8 @@ import collections
 import csv
 
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+import tensorflow as tf
 
 # Get the full path of the current file
 file_path = os.path.realpath(__file__)
