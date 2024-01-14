@@ -2,8 +2,15 @@ from PIL import Image
 import numpy as np
 import time
 import os
+import sys
 print(os.getcwd())
+# Get the full path of the current file
+file_path = os.path.realpath(__file__)
 
+# Extract the directory path
+directory_path = os.path.dirname(file_path)
+
+file_path = directory_path + '/chapter1.jpg'
 
 # Calculate the current time and the generated number according to the provided algorithm
 current_time = int(time.time())
@@ -12,7 +19,7 @@ if generated_number % 2 == 0:
     generated_number += 10
 print(generated_number)
 # Load the image
-original_image = Image.open(os.getcwd()+'/chapter1.jpg')
+original_image = Image.open(file_path)
 total_r = 0
 def increase_rgb(image, value):
     # Split the image into channels
