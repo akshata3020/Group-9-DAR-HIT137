@@ -36,7 +36,6 @@ count = split_file(file_path, chunk_size_mb=20)
 
 # Load pre-trained model and tokenizer for BioBERT
 def extract_disease_and_drug(text, model_name):
-    model_name = model_name
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForTokenClassification.from_pretrained(model_name)
     ner_pipeline = pipeline("ner", model=model, tokenizer=tokenizer)
@@ -47,32 +46,44 @@ def extract_disease_and_drug(text, model_name):
 # Process the results
 # (Here, you can filter and separate the 'diseases' and 'drugs' entities as needed)
 # Filter results for diseases and drugs
-diseases = []
-drugs = []
-for i in range(2):
+disease = []
+drug = []
+for i in range(count):
     i = i + 1
     file_path = directory_path + '/text' +'_part_'+str(i)+'.txt'
     print(file_path)
-    model_name = "ugaray96/biobert_ncbi_disease_ner"
     with open(file_path, 'r') as file:
         text = file.read().lower().strip()
+    model_name = "ugaray96/biobert_ncbi_disease_ner"
+
     ner_result = extract_disease_and_drug(text, model_name)
     
-    disease = [result['word'] for result in ner_result if result['entity'] == 'Disease']
-    
-    diseases.append(disease)
-
+#    disease = [result['word'] for result in ner_result if result["entity"] == "Disease"]
+    for result in ner_result:
+        if result["entity"] == "Disease":
+            disease.append(result['word'])
+    print(disease)
     model_name = "alvaroalon2/biobert_chemical_ner"
 
     ner_result = extract_disease_and_drug(text, model_name)
 
-    drug = [result['word'] for result in ner_result if result['entity'] == 'B-CHEMICAL']
-    drugs.append(drug)
+#    drug = [result['word'] for result in ner_result if result['entity'] == 'B-CHEMICAL']
+    for result in ner_result:
+        if result["entity"] == "B-CHEMICAL":
+            drug.append(result['word'])
+    print(drug)
     if os.path.exists(directory_path + '/text' +'_part_'+str(i)+'.txt'):
         os.remove(directory_path + '/text' +'_part_'+str(i)+'.txt')
 
 
-print(len(diseases))
-print("Diseases:", diseases)
-print(len(drugs))
-print("Drugs:", drugs)
+with open(directory_path+ '/text_BioBert.txt', 'w') as fp:
+    fp.write("Total Extracted diseases:" + str(len(disease)) +"\n")
+    for item in disease:
+        # write each item on a new line
+        fp.write("%s\n" % item)
+    print('Done')
+    fp.write("\nTotal Extracted drug:" + str(len(drug)) +"\n")
+    for item in drug:
+        # write each item on a new line
+        fp.write("%s\n" % item)
+    print('Done')
