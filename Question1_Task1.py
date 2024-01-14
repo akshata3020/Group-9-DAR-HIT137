@@ -13,33 +13,65 @@ import sys
 
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
-# Get the full path of the current file
-file_path = os.path.realpath(__file__)
+from transformers import AutoTokenizer, AutoModel
+from collections import Counter
+import tensorflow as tf
+import collections
+import csv
 
-# Extract the directory path
-directory_path = os.path.dirname(file_path)
+def count_unique_tokens(text, max_length=512):
+    """
+    Count unique tokens in the given text using the AutoTokenizer from the Transformers library.
+    Handles extremely long texts by tokenizing and processing in smaller segments.
 
-extract_to_path = directory_path
-list_of_files = []
+    :param text: Text to be tokenized and analyzed.
+    :param max_length: Maximum length of tokens for each segment.
+    :return: A dictionary with the top 30 tokens and their counts.
+    """
+    # Initialize the tokenizer
+    tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
 
-zip_folder_path = directory_path + '/Assignment2.zip'
-with zipfile.ZipFile(zip_folder_path, 'r') as zip_ref:
-    zip_ref.extractall(extract_to_path)
+    # Split the text into words
+    words = text.split()
 
-def fn():       # 1.Get file names from directory
-    file_list=os.listdir(directory_path)
-    for i in file_list:
-        if i.endswith('.csv'):
-            list_of_files.append(i)
-    return list_of_files
-list_of_files= fn()
-listOf = 'CSV1.csv'
-with open(directory_path + "/text.txt",'a') as file:
-    for j in list_of_files:
-        df = pd.read_csv(directory_path +'/'+ j.replace('.csv','') +'.csv')
-        for col in df.columns:
-            if 'TEXT' in col:
-                df = df[[col]]
-                df.to_csv(directory_path + '/text.txt', index=False, mode = 'a')
-with open(directory_path +"/text.txt") as file:
-    data = file.read().replace('\n',' ')
+    # Initialize variables for segment processing
+    start = 0
+    end = 0
+    token_counts = collections.Counter()
+
+    # Process the text in segments
+    while start < len(words):
+        # Prepare a segment
+        segment = " ".join(words[start:end])
+
+        # Tokenize the segment
+        tokenized_segment = tokenizer.tokenize(segment)
+
+        # Check if the tokenized segment is within the max_length or if we reached the end of the words
+        if len(tokenized_segment) <= max_length or end == len(words):
+            token_counts.update(tokenized_segment)
+            start = end
+            end += 1
+        else:
+            end -= 1
+
+    # Get the top 30 tokens
+    top_30_tokens = dict(token_counts.most_common(30))
+
+    return top_30_tokens
+
+
+top_30_token ={}
+update_dict_1 = {}
+
+file_path = 'C:/Users/ASUS/Downloads/Assignment 2/text'+'_part_K'+str(1)+'.txt'
+with open(file_path, 'r', encoding='utf-8') as file:
+        text = file.read()
+top_30_token = count_unique_tokens(text)
+for key, value in top_30_token.items():
+    print(key, ":", value)
+with open('C:/Users/ASUS/Downloads/Assignment 2/Top30Tokens.csv', 'w') as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(('token', 'occurrences'))
+    for key, value in top_30_token.items():
+       writer.writerow([key, value])
