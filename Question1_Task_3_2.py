@@ -8,17 +8,6 @@ from transformers import AutoTokenizer, AutoModel
 from collections import Counter
 import collections
 import csv
-def split_file(file_path, chunk_size_mb=20):
-    chunk_size = chunk_size_mb * 1024 * 1024  # Convert MB to bytes
-    file_number = 1
-
-    with open(file_path, 'rb') as file:
-        chunk = file.read(chunk_size)
-        while chunk:
-            with open(directory_path+'/text'+f"_part_{file_number}"+".txt", 'wb') as chunk_file:
-                chunk_file.write(chunk)
-            file_number += 1
-            chunk = file.read(chunk_size)
 # Usage
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
